@@ -10,6 +10,7 @@ from algorithms.DecisionTree import DecisionTree
 from algorithms.RandomForest import RandomForest
 from algorithms.NaiveBayes import NaiveBayes
 from algorithms.PCA import PCA
+from algorithms.Perceptron import Perceptron
 
 # cmap = ListedColormap(['#FF0000','#00FF00','#0000FF'])
 
@@ -97,27 +98,62 @@ from algorithms.PCA import PCA
 
 # print("Naive Bayes classification accuracy", accuracy(y_test, predictions))
 
-# data = datasets.load_digits()
-data = datasets.load_iris()
-X = data.data
-y = data.target
+# # data = datasets.load_digits()
+# data = datasets.load_iris()
+# X = data.data
+# y = data.target
 
-# Project the data onto the 2 primary principal components
-pca = PCA(2)
-pca.fit(X)
-X_projected = pca.transform(X)
+# # Project the data onto the 2 primary principal components
+# pca = PCA(2)
+# pca.fit(X)
+# X_projected = pca.transform(X)
 
-print("Shape of X:", X.shape)
-print("Shape of transformed X:", X_projected.shape)
+# print("Shape of X:", X.shape)
+# print("Shape of transformed X:", X_projected.shape)
 
-x1 = X_projected[:, 0]
-x2 = X_projected[:, 1]
+# x1 = X_projected[:, 0]
+# x2 = X_projected[:, 1]
 
-plt.scatter(
-    x1, x2, c=y, edgecolor="none", alpha=0.8, cmap=plt.cm.get_cmap("viridis", 3)
+# plt.scatter(
+#     x1, x2, c=y, edgecolor="none", alpha=0.8, cmap=plt.cm.get_cmap("viridis", 3)
+# )
+
+# plt.xlabel("Principal Component 1")
+# plt.ylabel("Principal Component 2")
+# plt.colorbar()
+# plt.show()
+
+def accuracy(y_true, y_pred):
+    accuracy = np.sum(y_true == y_pred) / len(y_true)
+    return accuracy
+
+X, y = datasets.make_blobs(
+    n_samples=150, n_features=2, centers=2, cluster_std=1.05, random_state=2
+)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=123
 )
 
-plt.xlabel("Principal Component 1")
-plt.ylabel("Principal Component 2")
-plt.colorbar()
+p = Perceptron(lr=0.01, n_iters=1000)
+p.fit(X_train, y_train)
+predictions = p.predict(X_test)
+
+print("Perceptron classification accuracy", accuracy(y_test, predictions))
+
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+plt.scatter(X_train[:, 0], X_train[:, 1], marker="o", c=y_train)
+
+x0_1 = np.amin(X_train[:, 0])
+x0_2 = np.amax(X_train[:, 0])
+
+x1_1 = (-p.weights[0] * x0_1 - p.bias) / p.weights[1]
+x1_2 = (-p.weights[0] * x0_2 - p.bias) / p.weights[1]
+
+ax.plot([x0_1, x0_2], [x1_1, x1_2], "k")
+
+ymin = np.amin(X_train[:, 1])
+ymax = np.amax(X_train[:, 1])
+ax.set_ylim([ymin - 3, ymax + 3])
+
 plt.show()
