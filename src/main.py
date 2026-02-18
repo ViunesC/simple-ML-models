@@ -3,12 +3,13 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-from KNN import KNN
-from LinearRegression import LinearRegression
-from LogisticRegression import LogisticRegression
-from DecisionTree import DecisionTree
-from RandomForest import RandomForest
-from NaiveBayes import NaiveBayes
+from algorithms.KNN import KNN
+from algorithms.LinearRegression import LinearRegression
+from algorithms.LogisticRegression import LogisticRegression
+from algorithms.DecisionTree import DecisionTree
+from algorithms.RandomForest import RandomForest
+from algorithms.NaiveBayes import NaiveBayes
+from algorithms.PCA import PCA
 
 # cmap = ListedColormap(['#FF0000','#00FF00','#0000FF'])
 
@@ -79,19 +80,44 @@ from NaiveBayes import NaiveBayes
 # print(acc)
 
 
-def accuracy(y_true, y_pred):
-        accuracy = np.sum(y_true == y_pred) / len(y_true)
-        return accuracy
+# def accuracy(y_true, y_pred):
+#         accuracy = np.sum(y_true == y_pred) / len(y_true)
+#         return accuracy
 
-X, y = datasets.make_classification(
-    n_samples=1000, n_features=10, n_classes=2, random_state=123
+# X, y = datasets.make_classification(
+#     n_samples=1000, n_features=10, n_classes=2, random_state=123
+# )
+# X_train, X_test, y_train, y_test = train_test_split(
+#     X, y, test_size=0.2, random_state=123
+# )
+
+# nb = NaiveBayes()
+# nb.fit(X_train, y_train)
+# predictions = nb.predict(X_test)
+
+# print("Naive Bayes classification accuracy", accuracy(y_test, predictions))
+
+# data = datasets.load_digits()
+data = datasets.load_iris()
+X = data.data
+y = data.target
+
+# Project the data onto the 2 primary principal components
+pca = PCA(2)
+pca.fit(X)
+X_projected = pca.transform(X)
+
+print("Shape of X:", X.shape)
+print("Shape of transformed X:", X_projected.shape)
+
+x1 = X_projected[:, 0]
+x2 = X_projected[:, 1]
+
+plt.scatter(
+    x1, x2, c=y, edgecolor="none", alpha=0.8, cmap=plt.cm.get_cmap("viridis", 3)
 )
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=123
-)
 
-nb = NaiveBayes()
-nb.fit(X_train, y_train)
-predictions = nb.predict(X_test)
-
-print("Naive Bayes classification accuracy", accuracy(y_test, predictions))
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.colorbar()
+plt.show()
